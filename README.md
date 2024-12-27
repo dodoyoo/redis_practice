@@ -1,5 +1,3 @@
-# Redis_Practice
-
 ## Redis란?
 
 - Redis는 Remote(원격)에 위치하고 프로세스로 존재하는 In-Memory 기반의 Dictionary(Key-value) 구조 데이터 관리 Server 시스템이다
@@ -17,3 +15,38 @@
 6. Redis는 기본적으로 1개의 싱글 쓰레드로 수행되기 때문에, 안정적은 인프라를 구축하기 위해서는 Replication 필수이다.
 
    
+## Cache 란?
+> Cache란 한번 조회된 데이터를 미리 특정 공간에 저장해놓고, 똑같은 요청이 발생하게 되면 서버에게 다시 요청하지 말고 저장해놓은 데이터를 제공해서 빠르게 서비스를 제공해주는 것을 의미한다
+> 미리 결과를 저장하고 나중에 요청이 오면 그 요청에 대해서 DB 또는 API를 참조하지 않고 Cache를 접근하여 요청을 처리하는 기법이다
+
+
+## Cache의 구조 패턴
+
+- Look aside Cache 패턴
+> 한번 접근하여 데이터가 있는지 판단한 후, 있다면 캐시의 데이터를 사요하고 없으면 실제 DB 또는 API를 호출한다.
+
+
+- Look aside Cache 쿼리 순서
+1. 클라이언트에서 데이터 요청
+2. 서버에서 캐시에 데이터 존재 유무 확인
+3. 데이터가 있다면 캐시의 데이터 사용(빠른 사용)
+4. 데이터가 없다면 실제 DB 데이터에 접근
+5. 그리고 DB에서 가져 온 데이터를 캐시에 저장하고 클라이언트에 반환
+   <div align="center">
+      <img  src="https://github.com/user-attachments/assets/0fc80379-d6ca-4208-8689-0e48d35e55da">
+   </div>
+
+
+- Write Back 패턴
+> wrire back은 주로 쓰기 작업이 많아서, INSERT 쿼리를 일일이 날리지 않고 한꺼번에 배치 처리하기 위해 사용한다
+> Insert를 1개씩 500번 수행하는 것보다 500개를 한번에 삽입하는 동작이 훨씬 빠르기 때문에 write back 방식은 빠른 속도로 서비스가 가능하다.
+
+
+- Write back 쿼리 순서
+1. 우선 모든 데이터를 캐시에 싹 저장
+2. 캐시의 데이터를 일정 주기마다 DB에 한꺼번에 저장 (배치)
+3. 그리고나선 DB에 저장했으니 잔존 데이터를 캐시에 제거
+   <div align="center">
+      <img src="https://github.com/user-attachments/assets/b4f0409b-64fc-44c5-8dfc-16942778d934">
+   </div>
+
