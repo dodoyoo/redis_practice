@@ -14,6 +14,18 @@
 5. 스냅샷 기능을 제공해 메모리 내용을 *.rdb 파일로 저장하여 해당 시점으로 복구할 수 있다
 6. Redis는 기본적으로 1개의 싱글 쓰레드로 수행되기 때문에, 안정적은 인프라를 구축하기 위해서는 Replication 필수이다.
 
+
+## Redis 주요 사용 사례
+> Redis의 사용 사례를 검색해보면 다양하게 나온다. 그 중 대표적인 사용 사례는 다음과 같다.
+
+- 캐싱(Caching)
+- 세션 관리 (Session Management)
+- 실시간 분석 및 통계 (Real-time Analystics)
+- 메시지 큐 (Message Queue)
+- 지리공간 인덱싱 (Geospatial Indexing)
+- 속도 제한 (Rate Limiting)
+- 실시간 채팅 및 메시징 (Real-time Chat And Messaging)
+
    
 ## Cache 란?
 > Cache란 한번 조회된 데이터를 미리 특정 공간에 저장해놓고, 똑같은 요청이 발생하게 되면 서버에게 다시 요청하지 말고 저장해놓은 데이터를 제공해서 빠르게 서비스를 제공해주는 것을 의미한다
