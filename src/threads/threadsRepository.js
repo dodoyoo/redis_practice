@@ -17,4 +17,13 @@ const createThreads = async (user_id, title, content) => {
   );
 };
 
-module.exports = { createThreads };
+const getAllThread = async (id, title, content) => {
+  const result = await AppDataSource.query(
+    `
+    SELECT id, title, content FROM boards
+    `
+  );
+  return result;
+};
+
+module.exports = { createThreads, getAllThread };

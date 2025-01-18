@@ -1,5 +1,6 @@
 const { catchAsync } = require('../utils/errorHandle');
 const { createThreads } = require('./threadsRepository');
+const { getAllThread } = require('./threadsRepository');
 
 const createThread = catchAsync(async (req, res) => {
   const { user_id, title, content } = req.body;
@@ -15,4 +16,9 @@ const createThread = catchAsync(async (req, res) => {
   res.status(201).json({ message: '게시글 작성 성공' });
 });
 
-module.exports = { createThread };
+const getThread = catchAsync(async (req, res) => {
+  const data = await getAllThread();
+
+  res.status(200).json({ data });
+});
+module.exports = { createThread, getThread };
