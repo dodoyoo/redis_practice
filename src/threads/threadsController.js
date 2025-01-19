@@ -17,9 +17,10 @@ const createThread = catchAsync(async (req, res) => {
 });
 
 const getThread = catchAsync(async (req, res) => {
-  const data = await getAllThread();
+  const page = parseInt(req.query.page) || 1;
+  const limit = parseInt(req.query.limit) || 50;
+  const data = await getAllThread(page, limit);
 
-  console.log('@@@@@@@@@@@@@@:', data);
   res.status(200).json({ data });
 });
 module.exports = { createThread, getThread };

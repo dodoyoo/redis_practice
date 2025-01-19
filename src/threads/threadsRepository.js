@@ -17,10 +17,13 @@ const createThreads = async (user_id, title, content) => {
   );
 };
 
-const getAllThread = async () => {
+const getAllThread = async (page = 1, limit = 50) => {
+  const offset = (page - 1) * limit;
+
   const result = await AppDataSource.query(
     `
     SELECT id, title, content FROM boards
+    LiMIT ${limit} OFFSET ${offset}
     `
   );
   return result;
