@@ -2,11 +2,14 @@ require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const morgan = require('morgan');
+const dotenv = require('dotenv');
+const redis = require('redis');
 const { globalErrorHandler } = require('./src/utils/errorHandle');
 const userRouter = require('./src/users/userRoute');
 const { AppDataSource } = require('./src/models/data_source');
 const threadRouter = require('./src/threads/threadsRoute');
 
+dotenv.config();
 const app = express();
 
 app.use(cors());
@@ -31,3 +34,16 @@ app.listen(PORT, async () => {
     });
   console.log(`Listening to request on port: ${PORT}`);
 });
+
+const redisClient = redis.createClient({
+  url: `redis://:@${process.env.REDIS_HOST}:${process.env.REDIS_PORT}/0`,
+  legacyMode: true,
+});
+redisClient.on('connect', () => {
+  console.info('Redis connected');
+});
+redisClient.on('error', (err) => {
+  console.error('Redis Client Error', err);
+});
+redisClient.connect().then();
+const redisCli = redisClient.v4;
