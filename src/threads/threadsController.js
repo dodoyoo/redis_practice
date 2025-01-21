@@ -16,7 +16,7 @@ const getThread = catchAsync(async (req, res) => {
       return res.status(200).json({ data });
     }
 
-    const cacheData = await redisClient.get(cacheKey);
+    let cacheData = await redisClient.get(cacheKey);
 
     if (cacheData) {
       cacheData = JSON.parse(cacheData);
@@ -28,7 +28,9 @@ const getThread = catchAsync(async (req, res) => {
     const data = await getAllThread(page, limit);
     console.log('Saving redis');
 
-    await redisClient.set(toString(cacheData), 60, JSON.stringify(data));
+    await redisClient.set(cacheKey, JSON.stringify(data), {
+      EX: 60,
+    });
     console.log('Saved To Redis');
 
     return res.status(200).json({
