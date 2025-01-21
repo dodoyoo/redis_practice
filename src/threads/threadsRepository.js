@@ -17,7 +17,7 @@ const createThreads = async (user_id, title, content) => {
   );
 };
 
-const getAllThread = async (id, title, content) => {
+const getAllThread = async () => {
   const result = await AppDataSource.query(
     `
     SELECT id, title, content FROM boards
