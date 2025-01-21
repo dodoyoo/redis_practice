@@ -1,6 +1,47 @@
 const { catchAsync } = require('../utils/errorHandle');
 const { createThreads } = require('./threadsRepository');
 const { getAllThread } = require('./threadsRepository');
+const { redisClient } = require('../utils/redis');
+
+const getThread = catchAsync(async (req, res) => {
+  const page = parseInt(req.query.page) || 1;
+  const limit = parseInt(req.query.limit) || 50;
+
+  try {
+    const cacheKey = `threads:page${page}:limit${limit}`;
+    console.log('cacheKey: ', cacheKey);
+
+    if (!redisClient.isOpen) {
+      const data = await getAllThread(page, limit);
+      return res.status(200).json({ data });
+    }
+
+    const cacheData = await redisClient.get(cacheKey);
+
+    if (cacheData) {
+      cacheData = JSON.parse(cacheData);
+      return res.status(200).json({
+        data: cacheData,
+        fromCache: true,
+      });
+    }
+    const data = await getAllThread(page, limit);
+    console.log('Saving redis');
+
+    await redisClient.set(toString(cacheData), 60, JSON.stringify(data));
+    console.log('Saved To Redis');
+
+    return res.status(200).json({
+      data,
+      fromCache: false,
+    });
+  } catch (error) {
+    console.error('Redis error', error);
+
+    const data = await getAllThread(page, limit);
+    return res.status(200).json({ data });
+  }
+});
 
 const createThread = catchAsync(async (req, res) => {
   const { user_id, title, content } = req.body;
@@ -14,13 +55,5 @@ const createThread = catchAsync(async (req, res) => {
   await createThreads(user_id, title, content);
 
   res.status(201).json({ message: '게시글 작성 성공' });
-});
-
-const getThread = catchAsync(async (req, res) => {
-  const page = parseInt(req.query.page) || 1;
-  const limit = parseInt(req.query.limit) || 50;
-  const data = await getAllThread(page, limit);
-
-  res.status(200).json({ data });
 });
 module.exports = { createThread, getThread };
