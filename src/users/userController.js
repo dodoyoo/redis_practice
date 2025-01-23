@@ -2,7 +2,7 @@ const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const { catchAsync } = require('../utils/errorHandle');
 const { createUser, getUserByEmail } = require('./userRepository');
-const { JsonWebTokenError } = require('jsonwebtoken');
+const { redisClient } = require('../utils/redis');
 
 const signUp = catchAsync(async (req, res) => {
   const { email, password, nickname } = req.body;
@@ -33,6 +33,37 @@ const signUp = catchAsync(async (req, res) => {
 const signIn = catchAsync(async (req, res) => {
   const { email, password } = req.body;
 
+  const cacheKey = `user:${email}`;
+
+  let cachedUser = await redisClient.get(cacheKey);
+
+  if (cachedUser) {
+    cachedUser = JSON.parse(cachedUser);
+
+    const isValidPassword = await bcrypt.compare(password, cachedUser.password);
+    if (!isValidPassword) {
+      const err = new Error('비밀번호가 다릅니다.');
+      err.statusCode = 404;
+      throw err;
+    }
+
+    const token = jwt.sign(
+      {
+        id: cachedUser.id,
+        email: cachedUser.email,
+      },
+      process.env.JWT_SECRET_KEY,
+      {
+        expiresIn: '7d',
+      }
+    );
+
+    return res.status(200).json({
+      message: '로그인 성공(Cache)',
+      token,
+    });
+  }
+
   const user = await getUserByEmail(email);
 
   if (!user) {
@@ -42,28 +73,26 @@ const signIn = catchAsync(async (req, res) => {
   }
 
   const isValidPassword = await bcrypt.compare(password, user.password);
-  console.log('password: ', password, '@@@@@@@@@@@@@@@@@@ :', user.password);
   if (!isValidPassword) {
     const err = new Error('비밀번호가 다릅니다.');
     err.statusCode = 404;
     throw err;
   }
 
+  await redisClient.set(cacheKey, JSON.stringify(user), {
+    EX: 60,
+  });
+
   const token = jwt.sign(
     {
-      id: user.id, // user 객체에서 id 가져옴
+      id: user.id,
       email: user.email,
     },
     process.env.JWT_SECRET_KEY,
-    {
-      expiresIn: '7d',
-    }
+    { expiresIn: '7d' }
   );
 
-  res.status(200).json({
-    message: '로그인 성공',
-    token,
-  });
+  res.status(200).json({ message: '로그인 성공(DB)', token });
 });
 
 module.exports = { signUp, signIn };
