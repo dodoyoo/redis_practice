@@ -9,7 +9,6 @@ const getThread = catchAsync(async (req, res) => {
 
   try {
     const cacheKey = `threads:page${page}:limit${limit}`;
-    console.log('cacheKey: ', cacheKey);
 
     if (!redisClient.isOpen) {
       const data = await getAllThread(page, limit);

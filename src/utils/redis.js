@@ -5,10 +5,6 @@ const redisClient = redis.createClient({
   port: process.env.REDIS_PORT,
 });
 
-(async () => {
-  await redisClient.connect();
-})();
-
 redisClient.on('connect', () => {
   console.log('Redis client connected');
 });
@@ -16,5 +12,9 @@ redisClient.on('connect', () => {
 redisClient.on('error', (err) => {
   console.error('Redis Client Error:', err);
 });
+
+(async () => {
+  await redisClient.connect();
+})();
 
 module.exports = { redisClient };

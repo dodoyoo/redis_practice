@@ -4,6 +4,7 @@ const { catchAsync } = require('../utils/errorHandle');
 const { createUser, getUserByEmail } = require('./userRepository');
 const { redisClient } = require('../utils/redis');
 
+// 유저 회원가입
 const signUp = catchAsync(async (req, res) => {
   const { email, password, nickname } = req.body;
 
@@ -30,6 +31,7 @@ const signUp = catchAsync(async (req, res) => {
   res.status(201).json({ message: '회원가입 성공' });
 });
 
+// 유저 로그인
 const signIn = catchAsync(async (req, res) => {
   const { email, password } = req.body;
 
